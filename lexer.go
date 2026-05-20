@@ -56,6 +56,11 @@ const (
 	DIVISION_TOKEN
 	DIV_TOKEN
 	MOD_TOKEN
+	BIT_AND_TOKEN
+
+	// Bool
+	AND_TOKEN
+	OR_TOKEN
 	NOT_TOKEN
 
 	// Comparison Operators
@@ -98,8 +103,93 @@ const (
 )
 
 var TOKENS = map[string]uint8{
-	"+": ADD_TOKEN,
-	// TODO All other easy tokens
+	"DECLARE":      DECLARE_TOKEN,
+	"OF":           OF_TOKEN,
+	"DEFINE":       DEFINE_TOKEN,
+	"REPEAT":       REPEAT_TOKEN,
+	"UNTIL":        UNTIL_TOKEN,
+	"PROCEDURE":    PROCEDURE_TOKEN,
+	"ENDPROCEDURE": END_PROCEDURE_TOKEN,
+	"FUNCTION":     FUNCTION_TOKEN,
+	"ENDFUNCTION":  END_FUNCTION_TOKEN,
+	"RETURNS":      RETURNS_TOKEN,
+	"RETURN":       RETURN_TOKEN,
+	"FOR":          FOR_TOKEN,
+	"TO":           TO_TOKEN,
+	"STEP":         STEP_TOKEN,
+	"NEXT":         NEXT_TOKEN,
+	"TYPE":         TYPE_TOKEN,
+	"ENDTYPE":      END_TYPE_TOKEN,
+	"CASE":         CASE_TOKEN,
+	"ENDCASE":      END_CASE_TOKEN,
+	"OTHERWISE":    OTHERWISE_TOKEN,
+	"CALL":         CALL_TOKEN,
+	"WHILE":        WHILE_TOKEN,
+	"ENDWHILE":     END_WHILE_TOKEN,
+	"BYREF":        BYREF_TOKEN,
+	"IF":           IF_TOKEN,
+	"THEN":         THEN_TOKEN,
+	"ELSE":         ELSE_TOKEN,
+	"ENDIF":        END_IF_TOKEN,
+
+	// Quality of life
+	"BREAK":    BREAK_TOKEN,
+	"CONTINUE": CONTINUE_TOKEN,
+
+	// OOP
+	"CLASS":    CLASS_TOKEN,
+	"INHERITS": INHERITS_TOKEN,
+	"NEW":      NEW_TOKEN,
+	"ENDCLASS": END_CLASS_TOKEN,
+	"PUBLIC":   PUBLIC_TOKEN,
+	"PRIVATE":  PRIVATE_TOKEN,
+
+	// Symbol Tokens
+	"<-": LEFT_ARROW_TOKEN,
+	",":  COMMA_TOKEN,
+	".":  FULL_STOP_TOKEN,
+	":":  COLON_TOKEN,
+	"^":  CARET_TOKEN,
+
+	// Arithmetic Operators
+	"+":   ADD_TOKEN,
+	"-":   SUBTRACT_TOKEN,
+	"*":   MULTIPLICATION_TOKEN,
+	"/":   DIVISION_TOKEN,
+	"DIV": DIV_TOKEN,
+	"MOD": MOD_TOKEN,
+	"&":   BIT_AND_TOKEN,
+
+	// Bool
+	"AND": AND_TOKEN,
+	"OR":  OR_TOKEN,
+	"NOT": NOT_TOKEN,
+
+	// Comparison Operators
+	">":  GREATER_TOKEN,
+	">=": GREATER_EQ_TOKEN,
+	"<":  LESSER_TOKEN,
+	"<=": LESSER_EQ_TOKEN,
+	"=":  EQUAL_TOKEN,
+	"<>": NOT_EQUAL_TOKEN,
+
+	// Brackets
+	"[": OPEN_SQUARE_TOKEN,
+	"]": CLOSE_SQUARE_TOKEN,
+	"{": OPEN_CURLY_TOKEN,
+	"}": CLOSE_CURLY_TOKEN,
+	"(": OPEN_PAREN_TOKEN,
+	")": CLOSE_PAREN_TOKEN,
+
+	// Builtins
+	"OUTPUT":    OUTPUT_TOKEN,
+	"INPUT":     INPUT_TOKEN,
+	"OPENFILE":  OPENFILE_TOKEN,
+	"SEEK":      SEEK_TOKEN,
+	"CLOSEFILE": CLOSEFILE_TOKEN,
+	"READFILE":  READFILE_TOKEN,
+	"WRITEFILE": WRITEFILE_TOKEN,
+	"EOF":       FILE_EOF_TOKEN,
 }
 
 type Span struct {
