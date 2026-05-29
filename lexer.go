@@ -1,7 +1,14 @@
 package main
 
+import (
+	"unicode"
+)
+
 const (
-	DECLARE_TOKEN = iota
+	INVALID_TOKEN = iota
+	EOF_TOKEN
+
+	DECLARE_TOKEN
 	OF_TOKEN
 	DEFINE_TOKEN
 	REPEAT_TOKEN
@@ -96,10 +103,6 @@ const (
 	READFILE_TOKEN
 	WRITEFILE_TOKEN
 	FILE_EOF_TOKEN
-
-	// Extras
-	EOF_TOKEN
-	INVALID_TOKEN
 )
 
 var TOKENS = map[string]uint8{
@@ -192,12 +195,162 @@ var TOKENS = map[string]uint8{
 	"EOF":       FILE_EOF_TOKEN,
 }
 
-type Span struct {
+type Pos struct {
 	Line uint16
 	Col  uint16
+}
+
+type Span struct {
+	From Pos
+	To   Pos
 }
 
 type Token struct {
 	TokenType uint8
 	Value     string
+	Span      Span
+}
+
+func tokenize(text string) []Token {
+	index := 0
+	tokens := make([]Token, 0, 256)
+	pos := Pos{
+		Line: 1,
+		Col:  1,
+	}
+
+	symbols := make([]byte, 0, 16)
+
+	for index < len(text) {
+		c := text[index]
+
+		if c == '\n' {
+			symbols = symbols[:0]
+			pos.Line += 1
+			pos.Col = 1
+			continue
+		} else if unicode.IsSpace(rune(c)) {
+			symbols = symbols[:0]
+			pos.Col += 1
+			index += 1
+			continue
+		} else if unicode.IsDigit(rune(c)) {
+			symbols = symbols[:0]
+			num := ""
+			is_real := false
+			from := pos
+
+			for unicode.IsDigit(rune(c)) || c == '_' || c == '.' {
+				if c == '.' {
+					is_real = true
+					num += string(c)
+				} else if c != '_' {
+					num += string(c)
+				}
+
+				pos.Col += 1
+				index += 1
+				c = text[index]
+			}
+
+			if is_real {
+				tokens = append(tokens, Token{
+					TokenType: REAL_TOKEN,
+					Value:     num,
+					Span:      Span{From: from, To: pos},
+				})
+			} else {
+				tokens = append(tokens, Token{
+					TokenType: INT_TOKEN,
+					Value:     num,
+					Span:      Span{From: from, To: pos},
+				})
+			}
+		} else if unicode.IsLetter(rune(c)) || c == '_' {
+			symbols = symbols[:0]
+			value := ""
+			from := pos
+
+			for unicode.IsLetter(rune(c)) || unicode.IsDigit(rune(c)) || c == '_' {
+				value += string(c)
+
+				pos.Col += 1
+				index += 1
+				c = text[index]
+			}
+
+			map_token := TOKENS[value]
+			if map_token != INVALID_TOKEN {
+				tokens = append(tokens, Token{
+					TokenType: map_token,
+					Value:     value,
+					Span:      Span{From: from, To: pos},
+				})
+			} else {
+				tokens = append(tokens, Token{
+					TokenType: IDENTIFIER_TOKEN,
+					Value:     value,
+					Span:      Span{From: from, To: pos},
+				})
+			}
+		} else if c == '"' || c == '\'' {
+			symbols = symbols[:0]
+			value := ""
+			from := pos
+			is_char := c == '\''
+
+			for (is_char && c != '\'') || (!is_char && c != '"') {
+				value += string(c)
+				if c == '\n' {
+					pos.Line += 1
+					pos.Col = 1
+				} else {
+					pos.Col += 1
+				}
+
+				index += 1
+				c = text[index]
+			}
+
+			if is_char {
+				tokens = append(tokens, Token{
+					TokenType: CHAR_TOKEN,
+					Value:     value,
+					Span:      Span{From: from, To: pos},
+				})
+			} else {
+				tokens = append(tokens, Token{
+					TokenType: STRING_TOKEN,
+					Value:     value,
+					Span:      Span{From: from, To: pos},
+				})
+			}
+		} else {
+			symbols = append(symbols, c)
+			value := string(symbols)
+			map_token := TOKENS[value]
+			if map_token != INVALID_TOKEN {
+				tokens = append(tokens, Token{
+					TokenType: map_token,
+					Value:     value,
+					Span: Span{From: Pos{
+						Line: pos.Line,
+						Col:  pos.Col - uint16(len(symbols)),
+					}, To: pos},
+				})
+
+				symbols = symbols[:0]
+			}
+
+			index += 1
+		}
+	}
+
+	tokens = append(tokens, Token{
+		TokenType: EOF_TOKEN,
+		Value:     "EOF",
+		Span:      Span{},
+	})
+
+	return tokens
 }
