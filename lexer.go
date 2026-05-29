@@ -211,7 +211,7 @@ type Token struct {
 	Span      Span
 }
 
-func zero_symbols(symbols *[]byte, tokens *[]Token) {
+func zeroSymbols(symbols *[]byte, tokens *[]Token) {
 	if len(*symbols) > 0 {
 		*tokens = append((*tokens), Token{
 			TokenType: INVALID_TOKEN,
@@ -236,17 +236,17 @@ func tokenize(text string) []Token {
 		c := text[index]
 
 		if c == '\n' {
-			zero_symbols(&symbols, &tokens)
+			zeroSymbols(&symbols, &tokens)
 			pos.Line += 1
 			pos.Col = 1
 			continue
 		} else if unicode.IsSpace(rune(c)) {
-			zero_symbols(&symbols, &tokens)
+			zeroSymbols(&symbols, &tokens)
 			pos.Col += 1
 			index += 1
 			continue
 		} else if unicode.IsDigit(rune(c)) {
-			zero_symbols(&symbols, &tokens)
+			zeroSymbols(&symbols, &tokens)
 			num := ""
 			is_real := false
 			from := pos
@@ -278,7 +278,7 @@ func tokenize(text string) []Token {
 				})
 			}
 		} else if unicode.IsLetter(rune(c)) || c == '_' {
-			zero_symbols(&symbols, &tokens)
+			zeroSymbols(&symbols, &tokens)
 			value := ""
 			from := pos
 
@@ -290,10 +290,10 @@ func tokenize(text string) []Token {
 				c = text[index]
 			}
 
-			map_token := TOKENS[value]
-			if map_token != INVALID_TOKEN {
+			mapToken := TOKENS[value]
+			if mapToken != INVALID_TOKEN {
 				tokens = append(tokens, Token{
-					TokenType: map_token,
+					TokenType: mapToken,
 					Value:     value,
 					Span:      Span{From: from, To: pos},
 				})
@@ -305,12 +305,12 @@ func tokenize(text string) []Token {
 				})
 			}
 		} else if c == '"' || c == '\'' {
-			zero_symbols(&symbols, &tokens)
+			zeroSymbols(&symbols, &tokens)
 			value := ""
 			from := pos
-			is_char := c == '\''
+			isChar := c == '\''
 
-			for (is_char && c != '\'') || (!is_char && c != '"') {
+			for (isChar && c != '\'') || (!isChar && c != '"') {
 				value += string(c)
 				if c == '\n' {
 					pos.Line += 1
@@ -323,7 +323,7 @@ func tokenize(text string) []Token {
 				c = text[index]
 			}
 
-			if is_char {
+			if isChar {
 				tokens = append(tokens, Token{
 					TokenType: CHAR_TOKEN,
 					Value:     value,
@@ -339,10 +339,10 @@ func tokenize(text string) []Token {
 		} else {
 			symbols = append(symbols, c)
 			value := string(symbols)
-			map_token := TOKENS[value]
-			if map_token != INVALID_TOKEN {
+			mapToken := TOKENS[value]
+			if mapToken != INVALID_TOKEN {
 				tokens = append(tokens, Token{
-					TokenType: map_token,
+					TokenType: mapToken,
 					Value:     value,
 					Span: Span{From: Pos{
 						Line: pos.Line,
@@ -357,7 +357,7 @@ func tokenize(text string) []Token {
 		}
 	}
 
-	zero_symbols(&symbols, &tokens)
+	zeroSymbols(&symbols, &tokens)
 
 	tokens = append(tokens, Token{
 		TokenType: EOF_TOKEN,
