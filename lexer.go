@@ -211,6 +211,17 @@ type Token struct {
 	Span      Span
 }
 
+func zero_symbols(symbols *[]byte, tokens *[]Token) {
+	if len(*symbols) > 0 {
+		*tokens = append((*tokens), Token{
+			TokenType: INVALID_TOKEN,
+			Value:     string(*symbols),
+		})
+	}
+
+	*symbols = (*symbols)[:0]
+}
+
 func tokenize(text string) []Token {
 	index := 0
 	tokens := make([]Token, 0, 256)
@@ -225,17 +236,17 @@ func tokenize(text string) []Token {
 		c := text[index]
 
 		if c == '\n' {
-			symbols = symbols[:0]
+			zero_symbols(&symbols, &tokens)
 			pos.Line += 1
 			pos.Col = 1
 			continue
 		} else if unicode.IsSpace(rune(c)) {
-			symbols = symbols[:0]
+			zero_symbols(&symbols, &tokens)
 			pos.Col += 1
 			index += 1
 			continue
 		} else if unicode.IsDigit(rune(c)) {
-			symbols = symbols[:0]
+			zero_symbols(&symbols, &tokens)
 			num := ""
 			is_real := false
 			from := pos
@@ -267,7 +278,7 @@ func tokenize(text string) []Token {
 				})
 			}
 		} else if unicode.IsLetter(rune(c)) || c == '_' {
-			symbols = symbols[:0]
+			zero_symbols(&symbols, &tokens)
 			value := ""
 			from := pos
 
@@ -294,7 +305,7 @@ func tokenize(text string) []Token {
 				})
 			}
 		} else if c == '"' || c == '\'' {
-			symbols = symbols[:0]
+			zero_symbols(&symbols, &tokens)
 			value := ""
 			from := pos
 			is_char := c == '\''
@@ -345,6 +356,8 @@ func tokenize(text string) []Token {
 			index += 1
 		}
 	}
+
+	zero_symbols(&symbols, &tokens)
 
 	tokens = append(tokens, Token{
 		TokenType: EOF_TOKEN,
