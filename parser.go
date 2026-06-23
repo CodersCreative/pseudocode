@@ -1,32 +1,44 @@
 package main
 
+// --- Data Types ---
+
+type UserType interface {
+	isUserType()
+}
+
 type DataType interface {
 	isType()
 }
 
 type BoolType struct{}
 
-func (t BoolType) isType() {}
+func (t BoolType) isType()     {}
+func (t BoolType) isUserType() {}
 
 type IntType struct{}
 
-func (t IntType) isType() {}
+func (t IntType) isType()     {}
+func (t IntType) isUserType() {}
 
 type RealType struct{}
 
-func (t RealType) isType() {}
+func (t RealType) isType()     {}
+func (t RealType) isUserType() {}
 
 type StringType struct{}
 
-func (t StringType) isType() {}
+func (t StringType) isType()     {}
+func (t StringType) isUserType() {}
 
 type CharType struct{}
 
-func (t CharType) isType() {}
+func (t CharType) isType()     {}
+func (t CharType) isUserType() {}
 
 type DateType struct{}
 
-func (t DateType) isType() {}
+func (t DateType) isType()     {}
+func (t DateType) isUserType() {}
 
 type ArrayType struct {
 	From     uint32
@@ -34,13 +46,35 @@ type ArrayType struct {
 	DataType DataType
 }
 
-func (t ArrayType) isType() {}
+func (t ArrayType) isType()     {}
+func (t ArrayType) isUserType() {}
+
+type Array2DType struct {
+	FromX    uint32
+	ToX      uint32
+	FromY    uint32
+	ToY      uint32
+	DataType DataType
+}
+
+func (t Array2DType) isType()     {}
+func (t Array2DType) isUserType() {}
+
+type PointerType struct {
+	DataType DataType
+}
+
+func (t PointerType) isType()     {}
+func (t PointerType) isUserType() {}
 
 type UserDefinedType struct {
 	Identifier string
 }
 
-func (t UserDefinedType) isType() {}
+func (t UserDefinedType) isType()     {}
+func (t UserDefinedType) isUserType() {}
+
+// --- AST Nodes ---
 
 type ASTNode interface {
 	isNode()
@@ -84,6 +118,21 @@ type CharNode struct {
 
 func (n CharNode) isNode() {}
 
+type DeclareNode struct {
+	Identifiers []string
+	DataType    DataType
+	Value       ASTNode
+}
+
+func (n DeclareNode) isNode() {}
+
+type AssignNode struct {
+	Identifier string
+	Value      ASTNode
+}
+
+func (n AssignNode) isNode() {}
+
 type IFNode struct {
 	Condition ASTNode
 	Body      ASTNode
@@ -91,6 +140,20 @@ type IFNode struct {
 }
 
 func (n IFNode) isNode() {}
+
+type CaseArm struct {
+	Value ASTNode
+	// To will only be used for ranges and Value will become a from value
+	To     ASTNode
+	Action ASTNode
+}
+
+type CaseNode struct {
+	Arms []CaseArm
+	Else ASTNode
+}
+
+func (n CaseNode) isNode() {}
 
 type NilNode struct{}
 
@@ -149,9 +212,69 @@ type FuncNode struct {
 
 func (n FuncNode) isNode() {}
 
+// TODO Ensure that builtin calls like INPUT get routed here so that INPUT() is also valid
 type CallNode struct {
 	Func      ASTNode
 	Arguments []ASTNode
 }
 
 func (n CallNode) isNode() {}
+
+type NotNode struct {
+	Value ASTNode
+}
+
+func (n NotNode) isNode() {}
+
+// --- Binary Operations ---
+
+const (
+	GTOperator = iota
+	LTOperator
+	GEqOperator
+	LEqOperator
+	EqOperator
+	NEqOperator
+	AndOperator
+	OrOperator
+)
+
+type BinaryNode struct {
+	Left     ASTNode
+	Right    ASTNode
+	Operator uint8
+}
+
+func (n BinaryNode) isNode() {}
+
+// --- User-Defined Types ---
+
+type TypeNode struct {
+	Identifier string
+	Value      UserType
+}
+
+func (n TypeNode) isNode() {}
+
+type KeyValType struct {
+	Key   string
+	Value DataType
+}
+
+type RecordType struct {
+	Properties []KeyValType
+}
+
+func (t RecordType) isUserType() {}
+
+type EnumType struct {
+	Variants []string
+}
+
+func (t EnumType) isUserType() {}
+
+type SetType struct {
+	DataType DataType
+}
+
+func (t SetType) isUserType() {}
