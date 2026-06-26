@@ -189,20 +189,31 @@ type RepeatNode struct {
 
 func (n RepeatNode) isNode() {}
 
+type ClassProperty struct {
+	IsPublic   bool
+	Identifier string
+	DataType   DataType
+}
+
+type ClassMethod struct {
+	IsPublic bool
+	Function FuncNode
+}
+
+type ClassNode struct {
+	Identifier string
+	Inherits   []string
+	Properties []ClassProperty
+	Methods    []ClassMethod
+}
+
 type Param struct {
 	Identifier string
 	DataType   DataType
 	ByRef      bool
 }
 
-type ProcNode struct {
-	Identifier string
-	Parameters []Param
-	Body       ASTNode
-}
-
-func (n ProcNode) isNode() {}
-
+// A Proc can just be a FuncNode with a ReturnType
 type FuncNode struct {
 	Identifier string
 	Parameters []Param
